@@ -7,7 +7,7 @@ import { Footer } from '@/components/layout/Footer'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Medium Clone - Share your stories',
+  title: 'Storypress platform',
   description: 'A publishing platform for sharing ideas and stories',
 }
 
