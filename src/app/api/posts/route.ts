@@ -103,14 +103,24 @@ export async function POST(request: NextRequest) {
   const session = await getCurrentSession()
 
   if (!session?.user?.id) {
+    console.error('Post creation failed: No session found')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   try {
     const body = await request.json()
+    console.log('Received post data:', { 
+      title: body.title?.substring(0, 50), 
+      contentLength: body.content?.length,
+      tagsCount: body.tags?.length,
+      hasCoverImage: !!body.coverImage,
+      published: body.published 
+    })
+    
     const parsed = postPayloadSchema.safeParse(body)
 
     if (!parsed.success) {
+      console.error('Validation errors:', parsed.error.flatten().fieldErrors)
       return NextResponse.json(
         { error: parsed.error.flatten().fieldErrors },
         { status: 400 },
@@ -138,12 +148,20 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    console.log('Creating post with:', {
+      title: title.substring(0, 50),
+      slug,
+      authorId: session.user.id,
+      published: Boolean(published),
+      tagsCount: tagConnections.length,
+    })
+
     const post = await prisma.post.create({
       data: {
         title,
         content,
         slug,
-        coverImage,
+        coverImage: coverImage || null,
         excerpt: buildExcerpt(content),
         readTime: calculateReadingTime(content),
         published: Boolean(published),
@@ -172,9 +190,45 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    console.log('Post created successfully:', { id: post.id, slug: post.slug })
     return NextResponse.json({ data: post }, { status: 201 })
   } catch (error) {
     console.error('Failed to create post', error)
+    
+    // Provide more detailed error messages
+    if (error instanceof Error) {
+      // Prisma errors
+      if (error.message.includes('Unique constraint') || error.message.includes('UNIQUE constraint')) {
+        return NextResponse.json(
+          { error: 'A post with this title already exists. Please choose a different title.' },
+          { status: 400 }
+        )
+      }
+      
+      // Database connection errors
+      if (error.message.includes('connect') || error.message.includes('database') || error.message.includes('P1001')) {
+        console.error('Database connection error:', error)
+        return NextResponse.json(
+          { error: 'Database connection failed. Please check your database configuration.' },
+          { status: 500 }
+        )
+      }
+      
+      // Column doesn't exist errors
+      if (error.message.includes('does not exist') || error.message.includes('P2022')) {
+        console.error('Database schema error:', error)
+        return NextResponse.json(
+          { error: 'Database schema mismatch. Please run migrations.' },
+          { status: 500 }
+        )
+      }
+      
+      return NextResponse.json(
+        { error: error.message || 'Unable to create post' },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json({ error: 'Unable to create post' }, { status: 500 })
   }
 }

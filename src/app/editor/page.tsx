@@ -93,29 +93,54 @@ export default function EditorPage() {
   };
 
   const persistPost = async (publish: boolean) => {
+    // Client-side validation
+    if (!title || title.trim().length < 4) {
+      alert("Title must be at least 4 characters long");
+      return;
+    }
+
+    if (!content || content.trim().length < 20) {
+      alert("Content must be at least 20 characters long. Please write more.");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const response = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title,
-          content,
+          title: title.trim(),
+          content: content.trim(),
           tags: tagList,
-          coverImage,
+          coverImage: coverImage || undefined,
           published: publish,
         }),
       });
 
       const payload = await response.json();
+      
       if (!response.ok) {
+        // Handle validation errors
+        if (payload.error && typeof payload.error === 'object') {
+          const errorMessages = Object.entries(payload.error)
+            .map(([field, errors]) => `${field}: ${Array.isArray(errors) ? errors.join(', ') : errors}`)
+            .join('\n');
+          throw new Error(errorMessages);
+        }
         throw new Error(payload.error ?? "Failed to save post");
       }
 
-      router.push(publish ? `/posts/${payload.data.slug}` : "/dashboard");
+      // Success - redirect
+      if (publish) {
+        router.push(`/posts/${payload.data.slug}`);
+      } else {
+        router.push("/dashboard");
+      }
     } catch (error) {
-      console.error(error);
-      alert(error instanceof Error ? error.message : "Unable to save");
+      console.error("Post creation error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unable to save post. Please try again.";
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -147,7 +172,12 @@ export default function EditorPage() {
           )}
         </div>
 
-        <JoditEditor value={content} config={editorConfig} onBlur={(newContent: string) => setContent(newContent)} />
+        <JoditEditor 
+          value={content} 
+          config={editorConfig} 
+          onBlur={(newContent: string) => setContent(newContent)}
+          onChange={(newContent: string) => setContent(newContent)}
+        />
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">Tags</label>

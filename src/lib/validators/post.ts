@@ -8,7 +8,8 @@ export const postPayloadSchema = z.object({
     .string()
     .url('Cover image must be a valid URL')
     .optional()
-    .or(z.literal('').transform(() => undefined)),
+    .or(z.literal('').transform(() => undefined))
+    .or(z.undefined()),
   published: z.boolean().optional().default(false),
 })
 
