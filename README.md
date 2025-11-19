@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Storypress
+
+A rich publishing platform built with **Next.js App Router**, **NextAuth**, **Prisma**, and **React Query**. Storypress covers the full Phase 2 readiness brief: authentication, rich text editing, post lifecycle, social interactions, SEO-friendly routing, and deploy-ready quality gates.
+
+### Highlights
+
+- Credential-based auth with protected routes, session-aware navigation, and middleware guards.
+- Prisma-backed content models for posts, comments, likes, tags, and followers stored in SQLite (can be swapped for Postgres).
+- Rich writing experience powered by Jodit, Cloudinary/local media uploads, live previews, draft / publish workflow, tag management, and reading-time heuristics.
+- Feed, tag explorer, search, author hubs, post detail experience with threaded comments and optimistic React Query hooks.
+- Comprehensive API surface (`/api/posts`, `/api/profile`, `/api/follow`, `/api/media/upload`) with zod validation and Prisma queries.
+- TypeScript-first components, React Query provider, shared utilities, and Jest + Testing Library coverage for critical UI.
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Configure environment
+
+Create a `.env` file (or export the variables in your shell) with:
+
+```
+DATABASE_URL="file:./prisma/dev.db"
+NEXTAUTH_SECRET="replace-me"
+NEXTAUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_API_URL="http://localhost:3000"
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=""
+NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=""
+```
+
+> If you don’t have Cloudinary credentials, leave the `NEXT_PUBLIC_CLOUDINARY_*` values empty and the editor will fall back to the local `/api/media/upload` route (files land in `public/uploads`).
+
+### 3. Generate Prisma client & sync schema
+
+```bash
+npx prisma migrate deploy   # or `prisma db push` for dev
+npx prisma generate
+```
+
+SQLite is the default for local development. Swap `DATABASE_URL` for Postgres/Supabase when you’re ready for production and run `prisma migrate deploy`.
+
+### 4. Run the app
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Visit [http://localhost:3000](http://localhost:3000) to explore the experience: public marketing home, Explore search, tag hub, author profiles, editor, and dashboard.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Available scripts
 
-## Learn More
+| Command        | Description                                                            |
+| -------------- | ---------------------------------------------------------------------- |
+| `npm run dev`  | Start Next.js in development mode                                      |
+| `npm run build`| Production build (runs type/lint checks)                               |
+| `npm start`    | Serve the production build                                             |
+| `npm run lint` | ESLint (Next config)                                                   |
+| `npm test`     | Jest + Testing Library (jsdom)                                         |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+  app/                # App Router routes (marketing, auth, editor, API)
+  components/         # Layout, auth, post + comment widgets, providers
+  lib/                # Prisma client, auth config, helpers, validators
+  types/              # Shared TypeScript contracts
+prisma/               # Schema + migrations (SQLite by default)
+public/uploads/       # Local asset uploads for drafts/posts
+```
 
-## Deploy on Vercel
+Key flows:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `src/app/api/posts` – CRUD, filtering, pagination, likes, comments.
+- `src/app/api/profile` – author dashboards and public bios.
+- `src/app/api/follow` – follow/unfollow toggle.
+- `src/app/editor/page.tsx` – Jodit-based editor with Cloudinary/local uploads.
+- `src/app/dashboard/page.tsx` – author analytics, drafts, publish stats.
+- `src/app/posts/[slug]` – SEO-friendly story page with threaded comments.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## Testing
+
+Jest is configured through `jest.config.ts` with Next.js helpers. Tests live under `__tests__/`.
+
+```bash
+npm test
+```
+
+Add additional component or integration tests as the surface grows (e.g., CommentThread interactions, feed pagination).
+
+---
+
+## Deployment notes
+
+- Set `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `DATABASE_URL`, and any Cloudinary keys in Vercel’s dashboard.
+- Enable **Prisma Accelerate** or connection pooling for serverless databases.
+- `next build && next start` should pass locally before deploying.
+- Configure analytics/error reporting (Vercel Analytics, Sentry) as needed.
+
+Happy publishing! Contributions and enhancements for additional social features, analytics, or editor extensions are welcome.

@@ -77,8 +77,9 @@ export default function RegisterPage() {
       } else {
         router.push('/dashboard')
       }
-    } catch (error: any) {
-      setError(error.message || 'An error occurred during registration')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An error occurred during registration'
+      setError(message)
     } finally {
       setIsLoading(false)
     }

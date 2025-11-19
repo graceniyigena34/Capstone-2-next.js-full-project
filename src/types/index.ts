@@ -1,10 +1,34 @@
 export interface User {
   id: string
   email: string
+  name?: string | null
+  username?: string | null
+  image?: string | null
+  bio?: string | null
+  createdAt?: string
+  followersCount?: number
+  followingCount?: number
+}
+
+export interface Tag {
+  id: string
   name: string
-  avatar?: string
-  bio?: string
+  slug?: string | null
+}
+
+export interface Comment {
+  id: string
+  content: string
+  author: User
+  postId: string
   createdAt: string
+  parentId?: string | null
+  replies: Comment[]
+}
+
+export interface PostStats {
+  likes: number
+  comments: number
 }
 
 export interface Post {
@@ -16,33 +40,16 @@ export interface Post {
   author: User
   tags: Tag[]
   published: boolean
-  publishedAt?: string
+  publishedAt?: string | null
   createdAt: string
   updatedAt: string
-  coverImage?: string
+  coverImage?: string | null
   readTime: number
-  likes: number
-  comments: Comment[]
-}
-
-export interface Tag {
-  id: string
-  name: string
-  slug: string
-}
-
-export interface Comment {
-  id: string
-  content: string
-  author: User
-  postId: string
-  createdAt: string
-  parentId?: string
-  replies: Comment[]
+  _count?: PostStats
 }
 
 export interface ApiResponse<T> {
   data: T
   message?: string
-  success: boolean
+  nextCursor?: string | null
 }

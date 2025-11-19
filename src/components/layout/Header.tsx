@@ -2,17 +2,16 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '../../lib/utils'
+import { cn } from '@/lib/utils'
+import { AuthButton } from '@/components/auth/AuthButton'
 
 export function Header() {
   const pathname = usePathname()
 
   const navItems = [
     { href: '/', label: 'Home' },
-    { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' },
-      { href: '/explore', label: 'Explore' },
-
+    { href: '/explore', label: 'Explore' },
+    { href: '/tags', label: 'Topics' },
   ]
 
   return (
@@ -38,20 +37,7 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center space-x-4">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-gray-600 hover:text-green-600"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="rounded-full bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-            >
-              Get Started
-            </Link>
-          </div>
+          <AuthButton />
         </div>
       </div>
     </header>

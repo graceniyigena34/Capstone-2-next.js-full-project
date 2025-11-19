@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Container } from '../../components/layout/container';
+import { Container } from './container';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -20,7 +20,7 @@ export function Footer() {
             {/* Copyright */}
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <div className="w-6 h-6 bg-green-600 rounded-full" />
-              <span className="text-lg font-bold text-gray-900">Medium</span>
+              <span className="text-lg font-bold text-gray-900">Storypress</span>
             </div>
 
             {/* Links */}
@@ -38,7 +38,7 @@ export function Footer() {
 
             {/* Copyright Text */}
             <p className="text-sm text-gray-600 mt-4 md:mt-0">
-              © {currentYear} Medium Clone. All rights reserved.
+              © {currentYear} Storypress. All rights reserved.
             </p>
           </div>
         </div>
