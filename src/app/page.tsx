@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
+import { getCurrentSession } from '@/lib/auth'
 import type { Post } from '@/types'
 import { HomeFeed } from '@/components/posts/HomeFeed'
 
@@ -7,7 +8,8 @@ type LatestPostsResult = Awaited<ReturnType<typeof prisma.post.findMany>>
 type TrendingTagsResult = Awaited<ReturnType<typeof prisma.tag.findMany>>
 
 export default async function Home() {
-  const [latestPosts, trendingTags] = (await Promise.all([
+  const [session, latestPosts, trendingTags] = (await Promise.all([
+    getCurrentSession(),
     prisma.post.findMany({
       where: { published: true },
       take: 6,
@@ -26,7 +28,7 @@ export default async function Home() {
       take: 10,
       orderBy: { name: 'asc' },
     }),
-  ])) as [LatestPostsResult, TrendingTagsResult]
+  ])) as [Awaited<ReturnType<typeof getCurrentSession>>, LatestPostsResult, TrendingTagsResult]
 
   const serializedPosts = JSON.parse(JSON.stringify(latestPosts)) as Post[]
 
@@ -46,10 +48,10 @@ export default async function Home() {
           </p>
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
             <Link
-              href="/editor"
+              href={session ? "/editor" : "/login"}
               className="rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white text-center hover:bg-gray-800 transition-colors"
             >
-              Start writing
+              Start writing story
             </Link>
             <Link
               href="/explore"
