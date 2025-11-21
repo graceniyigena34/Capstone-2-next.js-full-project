@@ -6,7 +6,6 @@ import { getCurrentSession } from '@/lib/auth'
 
 type PublishedSummary = {
   id: string
-  slug: string
   title: string
   publishedAt: Date | null
   _count: { likes: number; comments: number }
@@ -14,9 +13,7 @@ type PublishedSummary = {
 
 type DraftSummary = {
   id: string
-  slug: string
   title: string
-  updatedAt: Date
   _count: { likes: number; comments: number }
 }
 
@@ -27,13 +24,12 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  const [publishedPosts, drafts, followers, following, totalLikes] = (await Promise.all([
+  const [publishedPosts, drafts, totalLikes] = (await Promise.all([
     prisma.post.findMany({
       where: { authorId: session.user.id, published: true },
       orderBy: { publishedAt: 'desc' },
       select: {
         id: true,
-        slug: true,
         title: true,
         publishedAt: true,
         _count: { select: { likes: true, comments: true } },
@@ -41,25 +37,20 @@ export default async function DashboardPage() {
     }),
     prisma.post.findMany({
       where: { authorId: session.user.id, published: false },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { id: 'desc' },
       select: {
         id: true,
-        slug: true,
         title: true,
-        updatedAt: true,
         _count: { select: { likes: true, comments: true } },
       },
-    }),
-    prisma.follow.count({
-      where: { followingId: session.user.id },
-    }),
-    prisma.follow.count({
-      where: { followerId: session.user.id },
     }),
     prisma.like.count({
       where: { post: { authorId: session.user.id } },
     }),
-  ])) as [PublishedSummary[], DraftSummary[], number, number, number]
+  ])) as [PublishedSummary[], DraftSummary[], number]
+
+  const followers = 0
+  const following = 0
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 space-y-10">
@@ -113,14 +104,14 @@ export default async function DashboardPage() {
             <div key={draft.id} className="flex flex-col gap-2 border-b border-gray-100 pb-4 last:border-none">
               <p className="text-base font-semibold text-gray-900">{draft.title}</p>
               <p className="text-sm text-gray-500">
-                Last edited {format(new Date(draft.updatedAt), 'MMM d, yyyy')}
+                Draft
               </p>
               <div className="flex gap-3 text-xs text-gray-500">
                 <span>{draft._count.likes} claps</span>
                 <span>{draft._count.comments} comments</span>
               </div>
               <Link
-                href={`/editor?draft=${draft.slug}`}
+                href={`/editor`}
                 className="text-sm font-semibold text-green-600"
               >
                 Keep writing
@@ -150,9 +141,9 @@ export default async function DashboardPage() {
             >
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <Link href={`/posts/${post.slug}`} className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-gray-900">
                     {post.title}
-                  </Link>
+                  </h3>
                   <p className="text-sm text-gray-500">
                     Published {post.publishedAt ? format(new Date(post.publishedAt), 'MMM d, yyyy') : '—'}
                   </p>

@@ -6,7 +6,6 @@ export const postPayloadSchema = z.object({
   tags: z.array(z.string().min(2)).max(8).default([]),
   coverImage: z
     .string()
-    .url('Cover image must be a valid URL')
     .optional()
     .or(z.literal('').transform(() => undefined))
     .or(z.undefined()),

@@ -1,7 +1,5 @@
-
-
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -10,93 +8,65 @@ generator client {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   name      String?
-  username  String   @unique
+  username  String    @unique
   image     String?
   bio       String?
-  password  String?   // ✅ fix
+  password  String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  posts     Post[]
-  comments  Comment[]
-  likes     Like[]
-  follows   Follow[]  @relation("UserFollows")
-  followers Follow[]  @relation("UserFollowers")
+  posts     Post[]    @relation("UserPosts")
+  comments  Comment[] @relation("UserComments")
+  likes     Like[]    @relation("UserLikes")
 }
 
 model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String
-  excerpt   String?
-  coverImage String?
-  slug      String   @unique
-  published Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  slug        String    @unique
+  excerpt     String?
+  coverImage  String?
+  readTime    Int       @default(1)
+  published   Boolean   @default(false)
   publishedAt DateTime?
-  readTime  Int      @default(1)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  author   User   @relation(fields: [authorId], references: [id])
-  authorId String
-  
-  tags     Tag[]
-  comments Comment[]
-  likes    Like[]
+  author      User      @relation("UserPosts", fields: [authorId], references: [id])
+  authorId    String
 
-  @@unique([authorId, slug])
+  comments    Comment[] @relation("PostComments")
+  likes       Like[]    @relation("PostLikes")
+  tags        Tag[]     @relation("PostTags")
 }
 
 model Comment {
-  id        String   @id @default(cuid())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id      String @id @default(cuid())
+  content String
 
-  author   User   @relation(fields: [authorId], references: [id])
-  authorId String
-  
-  post   Post   @relation(fields: [postId], references: [id])
-  postId String
-  
-  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id])
-  parentId String?
-  replies  Comment[] @relation("CommentReplies")
-  
-  likes    Like[]
+  post    Post   @relation("PostComments", fields: [postId], references: [id])
+  postId  String
+
+  user    User   @relation("UserComments", fields: [userId], references: [id])
+  userId  String
 }
 
 model Like {
-  id        String @id @default(cuid())
-  user      User   @relation(fields: [userId], references: [id])
-  userId    String
-  post      Post?  @relation(fields: [postId], references: [id])
-  postId    String?
-  comment   Comment? @relation(fields: [commentId], references: [id])
-  commentId String?
+  id     String @id @default(cuid())
 
-  @@unique([userId, postId])
-  @@unique([userId, commentId])
-}
+  post   Post   @relation("PostLikes", fields: [postId], references: [id])
+  postId String
 
-model Follow {
-  id          String @id @default(cuid())
-  follower   User   @relation("UserFollowers", fields: [followerId], references: [id])
-  followerId String
-  following   User   @relation("UserFollows", fields: [followingId], references: [id])
-  followingId String
-  createdAt DateTime @default(now())
-
-  @@unique([followerId, followingId])
+  user   User   @relation("UserLikes", fields: [userId], references: [id])
+  userId String
 }
 
 model Tag {
   id    String @id @default(cuid())
   name  String @unique
-  slug  String? @unique
-  posts Post[]
+  slug  String @unique
+
+  posts Post[] @relation("PostTags") // ✅ Matches Post.tags
 }
