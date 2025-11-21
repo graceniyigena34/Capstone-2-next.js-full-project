@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
       where,
       take: limit + 1,
       ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
-      orderBy: status === 'draft' ? { updatedAt: 'desc' } : { publishedAt: 'desc' },
+      orderBy: status === 'draft' ? { id: 'desc' } : { publishedAt: 'desc' },
       include: {
         author: {
           select: {

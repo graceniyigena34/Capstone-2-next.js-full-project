@@ -10,6 +10,23 @@ interface ExplorePageProps {
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   const query = searchParams?.q ?? ''
 
+  // Get recently published posts (last 24 hours) for highlighting
+  const recentlyPublished = await prisma.post.findMany({
+    where: {
+      published: true,
+      publishedAt: {
+        gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+      },
+    },
+    orderBy: { publishedAt: 'desc' },
+    take: 3,
+    include: {
+      author: { select: { id: true, name: true, username: true, image: true } },
+      tags: true,
+      _count: { select: { likes: true, comments: true } },
+    },
+  })
+
   const posts = await prisma.post.findMany({
     where: {
       published: true,
@@ -31,6 +48,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
   })
 
   const serializedPosts = JSON.parse(JSON.stringify(posts)) as Post[]
+  const serializedRecentPosts = JSON.parse(JSON.stringify(recentlyPublished)) as Post[]
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 space-y-8">
@@ -57,7 +75,33 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         </form>
       </div>
 
+      {/* Recently Published Section */}
+      {!query && serializedRecentPosts.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+            <h2 className="text-lg font-semibold text-gray-900">Recently Published</h2>
+            <span className="text-xs text-gray-500">New stories in the last 24 hours</span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {serializedRecentPosts.map((post) => (
+              <div key={post.id} className="relative">
+                <div className="absolute -top-2 -right-2 z-10">
+                  <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
+                    New
+                  </span>
+                </div>
+                <PostCard post={post} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="space-y-6">
+        <h2 className="text-lg font-semibold text-gray-900">
+          {query ? `Search Results for "${query}"` : 'All Stories'}
+        </h2>
         {serializedPosts.map((post) => (
           <PostCard key={post.id} post={post} />
         ))}

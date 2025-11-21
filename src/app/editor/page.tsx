@@ -133,7 +133,9 @@ export default function EditorPage() {
 
       // Success - redirect
       if (publish) {
-        router.push(`/posts/${payload.data.slug}`);
+        // Show success message and redirect to explore to see the published story
+        alert("Story published successfully! Redirecting to explore page...");
+        router.push("/explore");
       } else {
         router.push("/dashboard");
       }
@@ -234,7 +236,7 @@ export default function EditorPage() {
             disabled={isSubmitting}
             className="rounded-full bg-green-600 px-6 py-2 text-sm font-semibold text-white disabled:opacity-60"
           >
-            Publish
+            Publish to Explore
           </button>
         </div>
       </div>
