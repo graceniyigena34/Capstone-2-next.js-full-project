@@ -54,9 +54,14 @@ export default function EditorPage() {
   const editorConfig = useMemo(
     () => ({
       readonly: false,
-      height: 420,
-      toolbarAdaptive: false,
-      buttons: "bold,italic,underline,ul,ol,link,image,source",
+      height: window.innerWidth < 640 ? 300 : 420,
+      toolbarAdaptive: true,
+      buttons: window.innerWidth < 640 
+        ? "bold,italic,ul,ol,link,image" 
+        : "bold,italic,underline,ul,ol,link,image,source",
+      buttonsMD: "bold,italic,ul,ol,link,image",
+      buttonsSM: "bold,italic,link",
+      buttonsXS: "bold,italic",
       uploader: {
         insertImageAsBase64URI: false,
         async upload(file: File) {
@@ -149,26 +154,31 @@ export default function EditorPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6 px-4 py-10">
+    <div className="mx-auto max-w-5xl space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
       <div>
-        <p className="text-sm font-semibold uppercase tracking-wide text-green-600">Editor</p>
-        <h1 className="text-3xl font-bold text-gray-900">Create a new story</h1>
-        <p className="text-sm text-gray-500">Draft, collaborate, and publish when you&apos;re ready.</p>
+        <p className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-green-600">Editor</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">Create a new story</h1>
+        <p className="text-sm text-gray-500 mt-1">Draft, collaborate, and publish when you&apos;re ready.</p>
       </div>
 
-      <div className="space-y-4 rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="space-y-4 sm:space-y-6 rounded-2xl sm:rounded-3xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
         <input
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           placeholder="Give your story an unforgettable title"
-          className="w-full border-none text-3xl font-semibold text-gray-900 placeholder:text-gray-400 focus:outline-none"
+          className="w-full border-none text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 placeholder:text-gray-400 focus:outline-none leading-tight"
         />
 
-        <div className="space-y-2">
+        <div className="space-y-2 sm:space-y-3">
           <label className="text-sm font-medium text-gray-700">Cover image</label>
-          <input type="file" accept="image/*" onChange={handleCoverChange} />
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={handleCoverChange}
+            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+          />
           {coverImage && (
-            <div className="relative mt-4 h-56 w-full overflow-hidden rounded-2xl">
+            <div className="relative mt-3 sm:mt-4 h-40 sm:h-56 w-full overflow-hidden rounded-xl sm:rounded-2xl">
               <Image src={coverImage} alt="Cover" fill className="object-cover" />
             </div>
           )}
@@ -181,44 +191,49 @@ export default function EditorPage() {
           onChange={(newContent: string) => setContent(newContent)}
         />
 
-        <div className="space-y-2">
+        <div className="space-y-2 sm:space-y-3">
           <label className="text-sm font-medium text-gray-700">Tags</label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
               value={tagInput}
               onChange={(event) => setTagInput(event.target.value)}
               onKeyDown={(event) => event.key === "Enter" && (event.preventDefault(), handleTagAddition())}
               placeholder="Add up to 8 tags"
-              className="flex-1 rounded-full border border-gray-200 px-4 py-2 text-sm focus:border-green-500 focus:outline-none"
+              className="flex-1 rounded-full border border-gray-200 px-3 sm:px-4 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-2 focus:ring-green-100"
             />
             <button
               type="button"
               onClick={handleTagAddition}
-              className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700"
+              className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Add
             </button>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {tagList.map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700"
+                className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-gray-100 px-2.5 sm:px-3 py-1 text-xs font-semibold text-gray-700"
               >
                 #{tag}
-                <button type="button" onClick={() => setTagList((prev) => prev.filter((item) => item !== tag))}>
-                  x
+                <button 
+                  type="button" 
+                  onClick={() => setTagList((prev) => prev.filter((item) => item !== tag))}
+                  className="hover:text-red-600 transition-colors"
+                  aria-label={`Remove ${tag} tag`}
+                >
+                  ×
                 </button>
               </span>
             ))}
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => setPreviewOpen(true)}
-            className="rounded-full border border-gray-300 px-6 py-2 text-sm font-semibold text-gray-900"
+            className="rounded-full border border-gray-300 px-6 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-50 transition-colors text-center"
           >
             Preview
           </button>
@@ -226,42 +241,42 @@ export default function EditorPage() {
             type="button"
             onClick={() => persistPost(false)}
             disabled={isSubmitting}
-            className="rounded-full bg-gray-200 px-6 py-2 text-sm font-semibold text-gray-900 disabled:opacity-60"
+            className="rounded-full bg-gray-200 px-6 py-2 text-sm font-semibold text-gray-900 disabled:opacity-60 hover:bg-gray-300 transition-colors text-center"
           >
-            Save draft
+            {isSubmitting ? 'Saving...' : 'Save draft'}
           </button>
           <button
             type="button"
             onClick={() => persistPost(true)}
             disabled={isSubmitting}
-            className="rounded-full bg-green-600 px-6 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            className="rounded-full bg-green-600 px-6 py-2 text-sm font-semibold text-white disabled:opacity-60 hover:bg-green-700 transition-colors text-center"
           >
-            Publish to Explore
+            {isSubmitting ? 'Publishing...' : 'Publish to Explore'}
           </button>
         </div>
       </div>
 
       {previewOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-10">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">Preview</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-4 sm:py-10">
+          <div className="max-h-[95vh] sm:max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl sm:rounded-3xl bg-white p-4 sm:p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Preview</h2>
               <button
                 type="button"
                 onClick={() => setPreviewOpen(false)}
-                className="rounded-full border border-gray-200 px-3 py-1 text-sm"
+                className="rounded-full border border-gray-200 px-3 py-1 text-sm hover:bg-gray-50 transition-colors"
               >
                 Close
               </button>
             </div>
-            <div className="mt-4 space-y-4">
-              <h3 className="text-3xl font-bold text-gray-900">{title}</h3>
+            <div className="space-y-4 sm:space-y-6">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">{title}</h3>
               {coverImage && (
-                <div className="relative h-64 w-full overflow-hidden rounded-2xl">
+                <div className="relative h-48 sm:h-64 w-full overflow-hidden rounded-xl sm:rounded-2xl">
                   <Image src={coverImage} alt="Cover preview" fill className="object-cover" />
                 </div>
               )}
-              <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+              <div className="prose prose-sm sm:prose max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
             </div>
           </div>
         </div>

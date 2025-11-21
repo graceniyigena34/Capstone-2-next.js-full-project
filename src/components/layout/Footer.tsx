@@ -97,20 +97,20 @@ export function Footer() {
   return (
     <footer className="bg-gradient-to-b from-white to-gray-50 border-t border-gray-200 mt-auto">
       <Container>
-        <div className="py-12 lg:py-16">
+        <div className="py-8 sm:py-12 lg:py-16">
           {/* Footer Links Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-12 mb-8 sm:mb-12">
             {footerSections.map((section) => (
-              <div key={section.title} className="lg:col-span-1">
-                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
+              <div key={section.title} className="">
+                <h3 className="text-xs sm:text-sm font-semibold text-gray-900 uppercase tracking-wider mb-3 sm:mb-4">
                   {section.title}
                 </h3>
-                <ul className="space-y-3">
+                <ul className="space-y-2 sm:space-y-3">
                   {section.links.map((link) => (
                     <li key={link.name}>
                       <Link
                         href={link.href}
-                        className="text-sm text-gray-600 hover:text-green-600 transition-colors duration-200 inline-block hover:translate-x-1 transform"
+                        className="text-xs sm:text-sm text-gray-600 hover:text-green-600 transition-colors duration-200 inline-block hover:translate-x-1 transform"
                       >
                         {link.name}
                       </Link>
@@ -122,28 +122,28 @@ export function Footer() {
           </div>
 
           {/* Bottom Bar */}
-          <div className="pt-8 border-t border-gray-200">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div className="pt-6 sm:pt-8 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
               {/* Brand and Social */}
-              <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-6">
+              <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
                 <Link href="/" className="flex items-center space-x-2 group">
-                  <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
-                    <span className="text-white font-bold text-lg">S</span>
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+                    <span className="text-white font-bold text-sm sm:text-lg">S</span>
                   </div>
-                  <span className="text-xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">
+                  <span className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">
                     Storypress
                   </span>
                 </Link>
                 
                 {/* Social Links */}
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3 sm:space-x-4">
                   {socialLinks.map((social) => (
                     <a
                       key={social.name}
                       href={social.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-gray-400 hover:text-green-600 transition-colors duration-200 hover:scale-110 transform"
+                      className="text-gray-400 hover:text-green-600 transition-colors duration-200 hover:scale-110 transform p-1"
                       aria-label={social.name}
                     >
                       {social.icon}
@@ -153,7 +153,7 @@ export function Footer() {
               </div>
 
               {/* Copyright */}
-              <p className="text-sm text-gray-600 text-center md:text-right">
+              <p className="text-xs sm:text-sm text-gray-600 text-center sm:text-right">
                 © {currentYear} Storypress. All rights reserved.
               </p>
             </div>
