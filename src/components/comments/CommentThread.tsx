@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Comment } from '@/types'
 
@@ -24,6 +25,7 @@ async function getComments(slug: string): Promise<CommentResponse> {
 }
 
 export function CommentThread({ postSlug, initialComments }: CommentThreadProps) {
+  const { data: session } = useSession()
   const queryClient = useQueryClient()
   const [draftComment, setDraftComment] = useState('')
   const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({})
@@ -59,6 +61,10 @@ export function CommentThread({ postSlug, initialComments }: CommentThreadProps)
   })
 
   const handleSubmit = (content: string, parentId?: string) => {
+    if (!session) {
+      window.location.href = '/login'
+      return
+    }
     if (!content.trim()) return
     mutation.mutate({ content: content.trim(), parentId })
   }
@@ -79,18 +85,19 @@ export function CommentThread({ postSlug, initialComments }: CommentThreadProps)
         <textarea
           value={draftComment}
           onChange={(e) => setDraftComment(e.target.value)}
-          placeholder="Share your thoughts..."
+          placeholder={session ? "Share your thoughts..." : "Sign in to comment..."}
           className="w-full rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm focus:border-green-500 focus:outline-none"
           rows={3}
+          disabled={!session}
         />
         <div className="flex justify-end">
           <button
             type="button"
             onClick={() => handleSubmit(draftComment)}
-            disabled={mutation.isPending}
+            disabled={mutation.isPending || !session}
             className="rounded-full bg-gray-900 px-6 py-2 text-sm font-semibold text-white disabled:opacity-60"
           >
-            {mutation.isPending ? 'Posting...' : 'Respond'}
+            {!session ? 'Sign in to comment' : mutation.isPending ? 'Posting...' : 'Respond'}
           </button>
         </div>
       </div>
@@ -103,10 +110,10 @@ export function CommentThread({ postSlug, initialComments }: CommentThreadProps)
             <div className="mt-4 flex gap-4 text-xs text-gray-500">
               <button
                 type="button"
-                onClick={() => setActiveReply(comment.id)}
+                onClick={() => session ? setActiveReply(comment.id) : window.location.href = '/login'}
                 className="font-semibold text-green-600"
               >
-                Reply
+                {session ? 'Reply' : 'Sign in to reply'}
               </button>
             </div>
 
