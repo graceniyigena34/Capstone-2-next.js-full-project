@@ -2,6 +2,7 @@
 
 import { type InfiniteData, useInfiniteQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
+import Link from 'next/link'
 import { Post } from '@/types'
 import { PostCard } from './PostCard'
 
@@ -65,20 +66,43 @@ export function HomeFeed({ initialPosts }: HomeFeedProps) {
   const flattenedPosts = data.pages.flatMap((page) => page.data)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {flattenedPosts.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}
 
+      {flattenedPosts.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">📝</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">No stories yet</h3>
+          <p className="text-gray-600 mb-6">Be the first to share your story with the community!</p>
+          <Link
+            href="/editor"
+            className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-full hover:bg-green-700 transition-colors"
+          >
+            ✍️ Write your first story
+          </Link>
+        </div>
+      )}
+
       {hasNextPage && (
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-8">
           <button
             type="button"
             onClick={() => fetchNextPage()}
             disabled={isFetchingNextPage}
-            className="rounded-full border border-gray-300 px-6 py-2 text-sm font-medium text-gray-900 hover:border-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-8 py-3 bg-white border-2 border-gray-200 rounded-full text-sm font-semibold text-gray-700 hover:border-green-300 hover:text-green-700 disabled:cursor-not-allowed disabled:opacity-60 transition-all duration-200 shadow-sm hover:shadow-md"
           >
-            {isFetchingNextPage ? 'Loading...' : 'Load more stories'}
+            {isFetchingNextPage ? (
+              <>
+                <div className="w-4 h-4 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>
+                Loading stories...
+              </>
+            ) : (
+              <>
+                📚 Load more stories
+              </>
+            )}
           </button>
         </div>
       )}

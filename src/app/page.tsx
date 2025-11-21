@@ -2,13 +2,13 @@ import Link from 'next/link'
 import { prisma } from '@/lib/db'
 import { getCurrentSession } from '@/lib/auth'
 import type { Post } from '@/types'
-import { HomeFeed } from '@/components/posts/HomeFeed'
+import { PostCard } from '@/components/posts/PostCard'
 
 type LatestPostsResult = Awaited<ReturnType<typeof prisma.post.findMany>>
 type TrendingTagsResult = Awaited<ReturnType<typeof prisma.tag.findMany>>
 
 export default async function Home() {
-  const [session, latestPosts, trendingTags] = (await Promise.all([
+  const [session, latestPosts, trendingTags, featuredPost] = (await Promise.all([
     getCurrentSession(),
     prisma.post.findMany({
       where: { published: true },
@@ -28,84 +28,201 @@ export default async function Home() {
       take: 10,
       orderBy: { name: 'asc' },
     }),
-  ])) as [Awaited<ReturnType<typeof getCurrentSession>>, LatestPostsResult, TrendingTagsResult]
+    prisma.post.findFirst({
+      where: { published: true },
+      orderBy: { likes: { _count: 'desc' } },
+      include: {
+        author: {
+          select: { id: true, name: true, username: true, image: true },
+        },
+        tags: true,
+        _count: {
+          select: { likes: true, comments: true },
+        },
+      },
+    }),
+  ])) as [Awaited<ReturnType<typeof getCurrentSession>>, LatestPostsResult, TrendingTagsResult, LatestPostsResult[0]]
 
   const serializedPosts = JSON.parse(JSON.stringify(latestPosts)) as Post[]
+  const serializedFeatured = featuredPost ? JSON.parse(JSON.stringify(featuredPost)) as Post : null
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 sm:gap-8 lg:gap-12 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 xl:flex-row">
-      <div className="flex-1 space-y-6 sm:space-y-8 lg:space-y-12">
-        <section className="rounded-2xl sm:rounded-3xl bg-white p-6 sm:p-8 lg:p-10 shadow-sm ring-1 ring-gray-100">
-          <p className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-green-600">
-            STORYPRESS
-          </p>
-          <h1 className="mt-2 sm:mt-3 text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 leading-tight">
-            Where ideas take shape.
-          </h1>
-          <p className="mt-4 sm:mt-6 text-base sm:text-lg text-gray-600 leading-relaxed">
-            Publish thoughtful stories, follow your favorite authors, and build your personal corner
-            of the internet.
-          </p>
-          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <Link
-              href={session ? "/editor" : "/login"}
-              className="rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white text-center hover:bg-gray-800 transition-colors"
-            >
-              Start writing story
-            </Link>
-            <Link
-              href="/explore"
-              className="rounded-full border border-gray-300 px-6 py-3 text-sm font-semibold text-gray-900 text-center hover:bg-gray-50 transition-colors"
-            >
-              Browse stories
-            </Link>
-          </div>
-        </section>
-
-        <section className="space-y-4 sm:space-y-6">
-          <div>
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Latest from the community</h2>
-            <p className="text-sm sm:text-base text-gray-500 mt-1">
-              Fresh perspectives from authors you follow and trending voices
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-green-50">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-r from-green-600 via-green-700 to-emerald-800">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+          <div className="text-center">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight">
+              Where Stories
+              <span className="block text-green-200">Come to Life</span>
+            </h1>
+            <p className="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-green-100 leading-relaxed">
+              Join a community of storytellers. Share your thoughts, discover amazing content, and connect with readers who matter.
             </p>
-          </div>
-          <HomeFeed initialPosts={serializedPosts} />
-        </section>
-      </div>
-
-      <aside className="w-full xl:max-w-sm space-y-4 sm:space-y-6 xl:sticky xl:top-24 xl:h-fit">
-        <div className="rounded-xl sm:rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
-          <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-gray-500">Trending</h3>
-          <div className="mt-3 sm:mt-4 flex flex-wrap gap-2">
-            {trendingTags.map((tag) => (
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                key={tag.id}
-                href={`/tags/${tag.slug ?? tag.name}`}
-                className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                href={session ? "/editor" : "/signup"}
+                className="inline-flex items-center justify-center rounded-full bg-white px-8 py-4 text-base font-semibold text-green-700 shadow-lg hover:bg-gray-50 transition-all duration-200 transform hover:scale-105"
               >
-                #{tag.name}
+                {session ? "✍️ Start Writing" : "🚀 Join StoryPress"}
               </Link>
-            ))}
-            {trendingTags.length === 0 && (
-              <p className="text-xs sm:text-sm text-gray-500">Tags will appear as you start publishing.</p>
-            )}
+              <Link
+                href="/explore"
+                className="inline-flex items-center justify-center rounded-full border-2 border-white/30 px-8 py-4 text-base font-semibold text-white hover:bg-white/10 transition-all duration-200"
+              >
+                📚 Explore Stories
+              </Link>
+            </div>
           </div>
         </div>
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-gray-50 to-transparent"></div>
+      </section>
 
-        <div className="rounded-xl sm:rounded-2xl border border-gray-200 bg-gradient-to-br from-green-50 to-white p-4 sm:p-6 shadow-sm">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Join the creator program</h3>
-          <p className="mt-2 text-xs sm:text-sm text-gray-600 leading-relaxed">
-            Publish consistently, build an audience, and unlock insights about how your stories are
-            performing.
-          </p>
-          <Link
-            href="/signup"
-            className="mt-3 sm:mt-4 inline-flex w-full sm:w-auto justify-center rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 transition-colors"
-          >
-            Create your account
-          </Link>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+        <div className="flex flex-col xl:flex-row gap-8">
+          {/* Main Content */}
+          <div className="flex-1 space-y-12">
+            {/* Featured Story */}
+            {serializedFeatured && (
+              <section className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+                <div className="p-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">⭐ FEATURED</span>
+                  </div>
+                  <Link href={`/posts/${serializedFeatured.slug}`} className="group">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 group-hover:text-green-600 transition-colors leading-tight">
+                      {serializedFeatured.title}
+                    </h2>
+                    <p className="mt-4 text-gray-600 text-lg leading-relaxed line-clamp-3">
+                      {serializedFeatured.excerpt}
+                    </p>
+                  </Link>
+                  <div className="mt-6 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-semibold">
+                        {serializedFeatured.author.name?.[0] || serializedFeatured.author.username[0]}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">{serializedFeatured.author.name || serializedFeatured.author.username}</p>
+                        <p className="text-sm text-gray-500">{serializedFeatured.readTime} min read</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span className="flex items-center gap-1">
+                        ❤️ {serializedFeatured._count.likes}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        💬 {serializedFeatured._count.comments}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
+
+            {/* Latest Stories */}
+            <section className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Latest Stories</h2>
+                  <p className="text-gray-600 mt-1">Fresh content from our community</p>
+                </div>
+                <Link href="/explore" className="text-green-600 hover:text-green-700 font-semibold text-sm">
+                  View all →
+                </Link>
+              </div>
+              <div className="space-y-8">
+                {serializedPosts.map((post) => (
+                  <PostCard key={post.id} post={post} />
+                ))}
+                {serializedPosts.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">📝</div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No stories yet</h3>
+                    <p className="text-gray-600 mb-6">Be the first to share your story with the community!</p>
+                    <Link
+                      href="/editor"
+                      className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-full hover:bg-green-700 transition-colors"
+                    >
+                      ✍️ Write your first story
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </section>
+          </div>
+
+          {/* Sidebar */}
+          <aside className="w-full xl:max-w-sm space-y-6 xl:sticky xl:top-24 xl:h-fit">
+            {/* Trending Topics */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">🔥 Trending Topics</h3>
+              <div className="flex flex-wrap gap-2">
+                {trendingTags.map((tag) => (
+                  <Link
+                    key={tag.id}
+                    href={`/tags/${tag.slug ?? tag.name}`}
+                    className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 hover:from-green-200 hover:to-emerald-200 transition-all duration-200"
+                  >
+                    #{tag.name}
+                  </Link>
+                ))}
+                {trendingTags.length === 0 && (
+                  <p className="text-gray-500 text-sm italic">Topics will appear as stories are published</p>
+                )}
+              </div>
+            </div>
+
+            {/* Creator Spotlight */}
+            <div className="bg-gradient-to-br from-purple-50 via-white to-pink-50 rounded-2xl shadow-lg border border-purple-100 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-3">✨ Join Our Community</h3>
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                Share your stories, connect with readers, and be part of a growing community of creators.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span className="text-green-500">✓</span>
+                  Unlimited story publishing
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span className="text-green-500">✓</span>
+                  Reader analytics & insights
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <span className="text-green-500">✓</span>
+                  Community engagement tools
+                </div>
+              </div>
+              <Link
+                href={session ? "/dashboard" : "/signup"}
+                className="mt-4 w-full inline-flex justify-center items-center px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-full hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+              >
+                {session ? "📊 View Dashboard" : "🎯 Get Started"}
+              </Link>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">📈 Community Stats</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Stories Published</span>
+                  <span className="font-bold text-green-600">{latestPosts.length}+</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Active Topics</span>
+                  <span className="font-bold text-purple-600">{trendingTags.length}+</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Growing Daily</span>
+                  <span className="font-bold text-blue-600">📈</span>
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
-      </aside>
+      </div>
     </div>
   )
 }

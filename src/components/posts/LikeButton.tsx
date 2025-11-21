@@ -16,7 +16,10 @@ export function LikeButton({ slug, initialCount, initiallyLiked }: LikeButtonPro
   const toggleLike = async () => {
     setIsSubmitting(true)
     try {
-      const response = await fetch(`/api/posts/${slug}/like`, { method: 'POST' })
+      const response = await fetch(`/api/posts/${slug}/like`, { 
+        method: 'POST',
+        credentials: 'include'
+      })
 
       if (response.status === 401) {
         window.location.href = '/login'
