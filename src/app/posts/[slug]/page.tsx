@@ -15,6 +15,11 @@ interface PostPageProps {
 export default async function PostPage({ params }: PostPageProps) {
   const session = await getCurrentSession()
 
+  // Validate slug parameter
+  if (!params?.slug || typeof params.slug !== 'string') {
+    notFound()
+  }
+
   const post = await prisma.post.findUnique({
     where: { slug: params.slug },
     include: {

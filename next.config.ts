@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   webpack: (config, { dev }) => {
     if (dev) {
-      config.devtool = 'eval-source-map';
+      config.devtool = false;
     }
     return config;
   },

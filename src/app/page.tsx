@@ -25,6 +25,13 @@ export default async function Home() {
       },
     }),
     prisma.tag.findMany({
+      where: {
+        posts: {
+          some: {
+            published: true
+          }
+        }
+      },
       take: 10,
       orderBy: { name: 'asc' },
     }),
@@ -138,14 +145,14 @@ export default async function Home() {
                 ))}
                 {serializedPosts.length === 0 && (
                   <div className="text-center py-12">
-                    <div className="text-6xl mb-4">📝</div>
+                    <div className="text-6xl mb-4"></div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-2">No stories yet</h3>
                     <p className="text-gray-600 mb-6">Be the first to share your story with the community!</p>
                     <Link
                       href="/editor"
                       className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-semibold rounded-full hover:bg-green-700 transition-colors"
                     >
-                      ✍️ Write your first story
+                      Start Writing Story
                     </Link>
                   </div>
                 )}
@@ -157,7 +164,7 @@ export default async function Home() {
           <aside className="w-full xl:max-w-sm space-y-6 xl:sticky xl:top-24 xl:h-fit">
             {/* Trending Topics */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">🔥 Trending Topics</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Trending Topics</h3>
               <div className="flex flex-wrap gap-2">
                 {trendingTags.map((tag) => (
                   <Link
@@ -176,7 +183,7 @@ export default async function Home() {
 
             {/* Creator Spotlight */}
             <div className="bg-gradient-to-br from-purple-50 via-white to-pink-50 rounded-2xl shadow-lg border border-purple-100 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-3">✨ Join Our Community</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-3"> Join Our Community</h3>
               <p className="text-gray-600 text-sm leading-relaxed mb-4">
                 Share your stories, connect with readers, and be part of a growing community of creators.
               </p>
@@ -198,13 +205,13 @@ export default async function Home() {
                 href={session ? "/dashboard" : "/signup"}
                 className="mt-4 w-full inline-flex justify-center items-center px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-full hover:from-purple-700 hover:to-pink-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
               >
-                {session ? "📊 View Dashboard" : "🎯 Get Started"}
+                {session ? " View Dashboard" : " Get Started"}
               </Link>
             </div>
 
             {/* Quick Stats */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">📈 Community Stats</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Community Stats</h3>
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Stories Published</span>
@@ -216,7 +223,7 @@ export default async function Home() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Growing Daily</span>
-                  <span className="font-bold text-blue-600">📈</span>
+                  <span className="font-bold text-blue-600"></span>
                 </div>
               </div>
             </div>
