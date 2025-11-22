@@ -93,9 +93,9 @@ export function CommentThread({ postSlug, initialComments }: CommentThreadProps)
         <div className="flex justify-end">
           <button
             type="button"
-            onClick={() => handleSubmit(draftComment)}
-            disabled={mutation.isPending || !session}
-            className="rounded-full bg-gray-900 px-6 py-2 text-sm font-semibold text-white disabled:opacity-60"
+            onClick={() => !session ? window.location.href = '/login' : handleSubmit(draftComment)}
+            disabled={mutation.isPending}
+            className="rounded-full bg-gray-900 px-6 py-2 text-sm font-semibold text-white disabled:opacity-60 hover:bg-gray-800 transition-colors"
           >
             {!session ? 'Sign in to comment' : mutation.isPending ? 'Posting...' : 'Respond'}
           </button>

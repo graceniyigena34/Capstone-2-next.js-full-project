@@ -7,13 +7,14 @@ import { getCurrentSession } from '@/lib/auth'
 import type { Post } from '@/types'
 
 interface AuthorPageProps {
-  params: { username: string }
+  params: Promise<{ username: string }>
 }
 
 export default async function AuthorPage({ params }: AuthorPageProps) {
   const session = await getCurrentSession()
+  const { username } = await params
   const author = await prisma.user.findUnique({
-    where: { username: params.username },
+    where: { username },
     select: {
       id: true,
       name: true,
@@ -25,7 +26,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
         select: {
           posts: true,
           followers: true,
-          follows: true,
+          following: true,
         },
       },
       posts: {
@@ -74,7 +75,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
           <div className="flex gap-6 text-sm text-gray-500">
             <span>{author._count.posts} stories</span>
             <span>{author._count.followers} followers</span>
-            <span>{author._count.follows} following</span>
+            <span>{author._count.following} following</span>
           </div>
         </div>
         {!isOwner && (

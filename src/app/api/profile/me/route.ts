@@ -24,7 +24,7 @@ export async function GET() {
           select: {
             posts: true,
             followers: true,
-            follows: true,
+            following: true,
           },
         },
         posts: {

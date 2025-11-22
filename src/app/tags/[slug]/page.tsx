@@ -4,15 +4,16 @@ import { PostCard } from '@/components/posts/PostCard'
 import type { Post } from '@/types'
 
 interface TagPageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export default async function TagDetailPage({ params }: TagPageProps) {
+  const { slug } = await params
   const tag = await prisma.tag.findFirst({
     where: {
       OR: [
-        { slug: params.slug },
-        { name: params.slug },
+        { slug },
+        { name: slug },
       ],
     },
     include: {

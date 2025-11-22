@@ -4,7 +4,7 @@ import { PostCard } from '@/components/posts/PostCard'
 import type { Post } from '@/types'
 
 interface ExplorePageProps {
-  searchParams?: Promise<{ q?: string }>
+  searchParams: Promise<{ q?: string }>
 }
 
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {

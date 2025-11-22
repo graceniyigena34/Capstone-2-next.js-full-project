@@ -1,6 +1,9 @@
+'use client'
+
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
+import { useEffect, useState } from 'react'
 import type { Post } from '@/types'
 
 interface PostCardProps {
@@ -9,13 +12,18 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, variant = 'default' }: PostCardProps) {
+  const [mounted, setMounted] = useState(false)
   const showCover = variant === 'default' && Boolean(post.coverImage)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <article className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-xl hover:border-green-200 transition-all duration-300 transform hover:-translate-y-1">
       <header className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-          {post.author.name?.[0] || post.author.username[0]}
+          {post.author.name?.[0] || post.author.username?.[0] || 'U'}
         </div>
         <div className="flex-1">
           <Link href={`/authors/${post.author.username}`} className="font-semibold text-gray-900 hover:text-green-600 transition-colors">
@@ -23,7 +31,7 @@ export function PostCard({ post, variant = 'default' }: PostCardProps) {
           </Link>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <time dateTime={post.publishedAt ?? post.createdAt}>
-              {formatDistanceToNow(new Date(post.publishedAt ?? post.createdAt), { addSuffix: true })}
+              {mounted ? formatDistanceToNow(new Date(post.publishedAt ?? post.createdAt), { addSuffix: true }) : 'Loading...'}
             </time>
             <span>•</span>
             <span>{post.readTime} min read</span>

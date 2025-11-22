@@ -26,7 +26,7 @@ export async function GET(_request: Request, context: RouteContext) {
           select: {
             posts: true,
             followers: true,
-            follows: true,
+            following: true,
           },
         },
         posts: {

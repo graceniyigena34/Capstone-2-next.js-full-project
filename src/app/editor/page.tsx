@@ -54,9 +54,9 @@ export default function EditorPage() {
   const editorConfig = useMemo(
     () => ({
       readonly: false,
-      height: window.innerWidth < 640 ? 300 : 420,
+      height: typeof window !== 'undefined' && window.innerWidth < 640 ? 300 : 420,
       toolbarAdaptive: true,
-      buttons: window.innerWidth < 640 
+      buttons: typeof window !== 'undefined' && window.innerWidth < 640 
         ? "bold,italic,ul,ol,link,image" 
         : "bold,italic,underline,ul,ol,link,image,source",
       buttonsMD: "bold,italic,ul,ol,link,image",
