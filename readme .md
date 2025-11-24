@@ -1,0 +1,3 @@
+In this project, I used Supabase to create and register users directly in my database. Users can post, follow, comment, and like, and all their actions are stored in the database
+
+The Image I used is ![alt text](<Screenshot 2025-11-24 095717.png>) ![alt text](<Screenshot 2025-11-24 095752.png>) ![alt text](<Screenshot 2025-11-24 095806.png>) ![alt text](<Screenshot 2025-11-24 095821.png>) ![alt text](<Screenshot 2025-11-24 095835.png>)

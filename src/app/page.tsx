@@ -8,35 +8,46 @@ type LatestPostsResult = Awaited<ReturnType<typeof prisma.post.findMany>>
 type TrendingTagsResult = Awaited<ReturnType<typeof prisma.tag.findMany>>
 
 export default async function Home() {
-  const [session, latestPosts, trendingTags, featuredPost] = (await Promise.all([
-    getCurrentSession(),
-    prisma.post.findMany({
-      where: { published: true },
-      take: 6,
-      orderBy: { publishedAt: 'desc' },
-      include: {
-        author: { select: { id: true, name: true, username: true, image: true } },
-        tags: true,
-        _count: { select: { likes: true, comments: true } },
-      },
-    }),
-    prisma.tag.findMany({
-      where: { posts: { some: { published: true } } },
-      take: 10,
-      orderBy: { name: 'asc' },
-    }),
-    prisma.post.findFirst({
-      where: { published: true },
-      orderBy: { likes: { _count: 'desc' } },
-      include: {
-        author: { select: { id: true, name: true, username: true, image: true } },
-        tags: true,
-        _count: { select: { likes: true, comments: true } },
-      },
-    }),
-  ])) as [Awaited<ReturnType<typeof getCurrentSession>>, LatestPostsResult, TrendingTagsResult, LatestPostsResult[0]]
+  let session, latestPosts, trendingTags, featuredPost;
+  
+  try {
+    [session, latestPosts, trendingTags, featuredPost] = (await Promise.all([
+      getCurrentSession(),
+      prisma.post.findMany({
+        where: { published: true },
+        take: 6,
+        orderBy: { publishedAt: 'desc' },
+        include: {
+          author: { select: { id: true, name: true, username: true, image: true } },
+          tags: true,
+          _count: { select: { likes: true, comments: true } },
+        },
+      }),
+      prisma.tag.findMany({
+        where: { posts: { some: { published: true } } },
+        take: 10,
+        orderBy: { name: 'asc' },
+      }),
+      prisma.post.findFirst({
+        where: { published: true },
+        orderBy: { likes: { _count: 'desc' } },
+        include: {
+          author: { select: { id: true, name: true, username: true, image: true } },
+          tags: true,
+          _count: { select: { likes: true, comments: true } },
+        },
+      }),
+    ])) as [Awaited<ReturnType<typeof getCurrentSession>>, LatestPostsResult, TrendingTagsResult, LatestPostsResult[0]]
+  } catch (error) {
+    console.error('Database connection error:', error);
+    // Fallback to empty data when database is unavailable
+    session = null;
+    latestPosts = [];
+    trendingTags = [];
+    featuredPost = null;
+  }
 
-  const serializedPosts = JSON.parse(JSON.stringify(latestPosts)) as Post[]
+  const serializedPosts = latestPosts ? JSON.parse(JSON.stringify(latestPosts)) as Post[] : []
   const serializedFeatured = featuredPost ? JSON.parse(JSON.stringify(featuredPost)) as Post : null
 
   return (
@@ -140,7 +151,7 @@ export default async function Home() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
             <h3 className="text-lg font-bold mb-4">Trending Topics</h3>
             <div className="flex flex-wrap gap-2">
-              {trendingTags.map((tag) => (
+              {trendingTags?.map((tag) => (
                 <Link
                   key={tag.id}
                   href={`/tags/${tag.slug ?? tag.name}`}
@@ -148,8 +159,8 @@ export default async function Home() {
                 >
                   #{tag.name}
                 </Link>
-              ))}
-              {trendingTags.length === 0 && <p className="text-gray-500 dark:text-gray-400 text-sm italic">Topics will appear as stories are published</p>}
+              )) || []}
+              {(!trendingTags || trendingTags.length === 0) && <p className="text-gray-500 dark:text-gray-400 text-sm italic">Topics will appear as stories are published</p>}
             </div>
           </div>
 
@@ -169,8 +180,8 @@ export default async function Home() {
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
             <h3 className="text-lg font-bold mb-4">Community Stats</h3>
             <div className="space-y-3 text-gray-600 dark:text-gray-300">
-              <div className="flex justify-between"><span>Stories Published</span><span className="font-bold text-green-600">{latestPosts.length}+</span></div>
-              <div className="flex justify-between"><span>Active Topics</span><span className="font-bold text-purple-600">{trendingTags.length}+</span></div>
+              <div className="flex justify-between"><span>Stories Published</span><span className="font-bold text-green-600">{latestPosts?.length || 0}+</span></div>
+              <div className="flex justify-between"><span>Active Topics</span><span className="font-bold text-purple-600">{trendingTags?.length || 0}+</span></div>
               <div className="flex justify-between"><span>Growing Daily</span><span className="font-bold text-blue-600">📈</span></div>
             </div>
           </div>
