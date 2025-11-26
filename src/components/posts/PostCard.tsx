@@ -85,12 +85,12 @@ export function PostCard({ post, variant = 'default' }: PostCardProps) {
 
       <footer className="mt-6 pt-4 border-t border-gray-100 flex items-center justify-between">
         <div className="flex items-center gap-4 text-sm text-gray-500">
-          <span className="flex items-center gap-1.5 hover:text-red-500 transition-colors cursor-pointer">
+          <Link href={`/posts/${post.slug}`} className="flex items-center gap-1.5 hover:text-red-500 transition-colors cursor-pointer">
             ❤️ {post._count?.likes ?? 0}
-          </span>
-          <span className="flex items-center gap-1.5 hover:text-blue-500 transition-colors cursor-pointer">
+          </Link>
+          <Link href={`/posts/${post.slug}#comments`} className="flex items-center gap-1.5 hover:text-blue-500 transition-colors cursor-pointer">
             💬 {post._count?.comments ?? 0}
-          </span>
+          </Link>
         </div>
         <Link 
           href={`/posts/${post.slug}`}

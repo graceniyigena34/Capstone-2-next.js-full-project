@@ -175,7 +175,7 @@ export default async function PostPage({ params }: PostPageProps) {
         )}
       </article>
 
-      <section className="mt-8 sm:mt-12 bg-white rounded-2xl p-6 border border-gray-200">
+      <section id="comments" className="mt-8 sm:mt-12 bg-white rounded-2xl p-6 border border-gray-200">
         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Discussion ({serializedComments.length})</h2>
         <CommentThread postSlug={post.slug} initialComments={serializedComments} />
       </section>
