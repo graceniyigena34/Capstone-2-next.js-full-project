@@ -74,8 +74,12 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
           </div>
           <div className="flex gap-6 text-sm text-gray-500">
             <span>{author._count.posts} stories</span>
-            <span>{author._count.followers} followers</span>
-            <span>{author._count.following} following</span>
+            <Link href={`/authors/${author.username}/followers`} className="hover:text-green-600 transition-colors">
+              {author._count.followers} followers
+            </Link>
+            <Link href={`/authors/${author.username}/following`} className="hover:text-green-600 transition-colors">
+              {author._count.following} following
+            </Link>
           </div>
         </div>
         {!isOwner && (
