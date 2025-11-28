@@ -1,6 +1,6 @@
 export interface User {
   id: string
-  email: string
+  email?: string
   name?: string | null
   username?: string | null
   image?: string | null
@@ -34,11 +34,11 @@ export interface PostStats {
 export interface Post {
   id: string
   title: string
-  content: string
-  excerpt: string
+  content?: string
+  excerpt?: string
   slug: string
   author: User
-  tags: Tag[]
+  tags?: Tag[]
   published: boolean
   publishedAt?: string | null
   createdAt: string

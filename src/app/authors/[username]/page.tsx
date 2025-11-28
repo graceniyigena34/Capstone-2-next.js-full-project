@@ -32,9 +32,32 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
       posts: {
         where: { published: true },
         orderBy: { publishedAt: 'desc' },
-        include: {
-          author: true,
-          tags: true,
+        select: {
+          id: true,
+          title: true,
+          content: true,
+          slug: true,
+          published: true,
+          publishedAt: true,
+          createdAt: true,
+          updatedAt: true,
+          coverImage: true,
+          author: {
+            select: {
+              id: true,
+              name: true,
+              username: true,
+              image: true,
+              createdAt: true
+            }
+          },
+          tags: {
+            select: {
+              id: true,
+              name: true,
+              slug: true
+            }
+          },
           _count: {
             select: { likes: true, comments: true },
           },
@@ -47,7 +70,21 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
     notFound()
   }
 
-  const posts = JSON.parse(JSON.stringify(author.posts)) as Post[]
+  // Transform posts to match Post type
+  const posts: Post[] = author.posts.map(post => ({
+    ...post,
+    publishedAt: post.publishedAt ? post.publishedAt.toISOString() : null,
+    createdAt: post.createdAt.toISOString(),
+    updatedAt: post.updatedAt ? post.updatedAt.toISOString() : post.createdAt.toISOString(),
+    readTime: Math.max(1, Math.ceil((post.content?.length || 0) / 200)),
+    excerpt: post.content ? post.content.substring(0, 160) + (post.content.length > 160 ? '...' : '') : '',
+    author: {
+      ...post.author,
+      createdAt: post.author.createdAt ? post.author.createdAt.toISOString() : new Date().toISOString()
+    },
+    tags: post.tags
+  }))
+
   const isOwner = session?.user?.id === author.id
   const viewerFollows = !isOwner && session?.user?.id
     ? Boolean(
@@ -58,7 +95,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
               followingId: author.id,
             },
           },
-        }),
+        })
       )
     : false
 
@@ -102,14 +139,16 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
         ))}
       </section>
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <p className="text-sm text-gray-500">
-          Want to see more from this author?{' '}
-          <Link href="/login" className="font-semibold text-green-600">
-            Sign in to follow
-          </Link>
-        </p>
-      </div>
+      {!session && (
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <p className="text-sm text-gray-500">
+            Want to see more from this author?{' '}
+            <Link href="/login" className="font-semibold text-green-600">
+              Sign in to follow
+            </Link>
+          </p>
+        </div>
+      )}
     </div>
   )
 }

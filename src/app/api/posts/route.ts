@@ -103,26 +103,17 @@ export async function POST(request: NextRequest) {
   const session = await getCurrentSession()
 
   if (!session?.user?.id) {
-    console.error('Post creation failed: No session found')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   try {
     const body = await request.json()
-    console.log('Received post data:', { 
-      title: body.title?.substring(0, 50), 
-      contentLength: body.content?.length,
-      tagsCount: body.tags?.length,
-      hasCoverImage: !!body.coverImage,
-      published: body.published 
-    })
     
     const parsed = postPayloadSchema.safeParse(body)
 
     if (!parsed.success) {
-      console.error('Validation errors:', parsed.error.flatten().fieldErrors)
       return NextResponse.json(
-        { error: parsed.error.flatten().fieldErrors },
+        { error: 'Invalid request data', details: parsed.error.flatten().fieldErrors },
         { status: 400 },
       )
     }
@@ -148,13 +139,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log('Creating post with:', {
-      title: title.substring(0, 50),
-      slug,
-      authorId: session.user.id,
-      published: Boolean(published),
-      tagsCount: tagConnections.length,
-    })
+
 
     const post = await prisma.post.create({
       data: {
@@ -190,7 +175,6 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log('Post created successfully:', { id: post.id, slug: post.slug })
     return NextResponse.json({ data: post }, { status: 201 })
   } catch (error) {
     console.error('Failed to create post', error)

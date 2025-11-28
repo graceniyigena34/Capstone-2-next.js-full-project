@@ -87,39 +87,3 @@ export const authOptions: NextAuthOptions = {
 export function getCurrentSession() {
   return getServerSession(authOptions)
 }
-// import NextAuth from "next-auth"
-// import CredentialsProvider from "next-auth/providers/credentials"
-// import { prisma } from "./db"
-// import bcrypt from "bcryptjs"
-
-// export const authOptions = {
-//   providers: [
-//     CredentialsProvider({
-//       name: "Credentials",
-//       credentials: {
-//         email: {},
-//         password: {},
-//       },
-//       async authorize(credentials) {
-//         if (!credentials?.email || !credentials?.password) return null
-
-//         const user = await prisma.user.findUnique({
-//           where: { email: credentials.email },
-//         })
-
-//         if (!user) return null
-
-//         const isValid = await bcrypt.compare(credentials.password, user.password)
-//         if (!isValid) return null
-
-//         return user
-//       },
-//     }),
-//   ],
-//   session: { strategy: "jwt" },
-//   pages: {
-//     signIn: "/login",
-//   },
-// }
-
-// export const { handlers, auth, signIn, signOut } = NextAuth(authOptions)

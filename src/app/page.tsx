@@ -4,14 +4,47 @@ import { getCurrentSession } from '@/lib/auth'
 import type { Post } from '@/types'
 import { PostCard } from '@/components/posts/PostCard'
 
-type LatestPostsResult = Awaited<ReturnType<typeof prisma.post.findMany>>
+type PostWithRelations = {
+  id: string
+  title: string
+  content: string
+  createdAt: Date
+  updatedAt: Date
+  slug: string
+  excerpt: string | null
+  coverImage: string | null
+  readTime: number
+  published: boolean
+  publishedAt: Date | null
+  authorId: string
+  author: {
+    id: string
+    name: string | null
+    username: string
+    image: string | null
+  }
+  tags: {
+    id: string
+    name: string
+    slug: string
+  }[]
+  _count: {
+    likes: number
+    comments: number
+  }
+}
+
+type LatestPostsResult = PostWithRelations[]
 type TrendingTagsResult = Awaited<ReturnType<typeof prisma.tag.findMany>>
 
 export default async function Home() {
-  let session, latestPosts, trendingTags, featuredPost;
+  let session: Awaited<ReturnType<typeof getCurrentSession>> = null;
+  let latestPosts: LatestPostsResult = [];
+  let trendingTags: TrendingTagsResult = [];
+  let featuredPost: PostWithRelations | null = null;
   
   try {
-    [session, latestPosts, trendingTags, featuredPost] = (await Promise.all([
+    [session, latestPosts, trendingTags, featuredPost] = await Promise.all([
       getCurrentSession(),
       prisma.post.findMany({
         where: { published: true },
@@ -37,7 +70,7 @@ export default async function Home() {
           _count: { select: { likes: true, comments: true } },
         },
       }),
-    ])) as [Awaited<ReturnType<typeof getCurrentSession>>, LatestPostsResult, TrendingTagsResult, LatestPostsResult[0]]
+    ])
   } catch (error) {
     console.error('Database connection error:', error);
     // Fallback to empty data when database is unavailable
@@ -47,8 +80,34 @@ export default async function Home() {
     featuredPost = null;
   }
 
-  const serializedPosts = latestPosts ? JSON.parse(JSON.stringify(latestPosts)) as Post[] : []
-  const serializedFeatured = featuredPost ? JSON.parse(JSON.stringify(featuredPost)) as Post : null
+  // Transform posts to match Post type
+  const serializedPosts: Post[] = (latestPosts || []).map(post => ({
+    ...post,
+    publishedAt: post.publishedAt?.toISOString() || null,
+    createdAt: post.createdAt.toISOString(),
+    updatedAt: post.updatedAt?.toISOString() || post.createdAt.toISOString(),
+    readTime: Math.max(1, Math.ceil((post.content?.length || 0) / 200)),
+    excerpt: post.content ? post.content.substring(0, 160) + (post.content.length > 160 ? '...' : '') : '',
+    author: {
+      ...post.author,
+      createdAt: new Date().toISOString()
+    },
+    tags: post.tags || []
+  }))
+
+  const serializedFeatured: Post | null = featuredPost ? {
+    ...featuredPost,
+    publishedAt: featuredPost.publishedAt?.toISOString() || null,
+    createdAt: featuredPost.createdAt.toISOString(),
+    updatedAt: featuredPost.updatedAt?.toISOString() || featuredPost.createdAt.toISOString(),
+    readTime: Math.max(1, Math.ceil((featuredPost.content?.length || 0) / 200)),
+    excerpt: featuredPost.content ? featuredPost.content.substring(0, 160) + (featuredPost.content.length > 160 ? '...' : '') : '',
+    author: {
+      ...featuredPost.author,
+      createdAt: new Date().toISOString()
+    },
+    tags: featuredPost.tags || []
+  } : null
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-green-50 dark:from-gray-900 dark:via-gray-800 dark:to-green-900 text-gray-900 dark:text-gray-100">
@@ -64,10 +123,10 @@ export default async function Home() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href={session ? "/editor" : "/signup"}
+              href="/editor"
               className="rounded-full bg-white dark:bg-gray-800 px-8 py-4 text-green-700 dark:text-green-300 font-semibold shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105 transition transform"
             >
-              {session ? "Start Writing" : "Join StoryPress"}
+              Start Writing
             </Link>
             <Link
               href="/explore"
@@ -169,10 +228,10 @@ export default async function Home() {
             <h3 className="text-lg font-bold mb-3">Join Our Community</h3>
             <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">Share your stories, connect with readers, and be part of a growing community of creators.</p>
             <Link
-              href={session ? "/dashboard" : "/signup"}
+              href="/dashboard"
               className="mt-4 w-full inline-flex justify-center items-center px-4 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-full transition transform hover:scale-105 shadow-lg"
             >
-              {session ? "View Dashboard" : "Get Started"}
+              Get Started
             </Link>
           </div>
 

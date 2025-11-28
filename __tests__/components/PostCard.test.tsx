@@ -34,7 +34,8 @@ describe('PostCard', () => {
     expect(screen.getByText(/Test post/i)).toBeInTheDocument()
     expect(screen.getByText(/Demo Author/i)).toBeInTheDocument()
     expect(screen.getByText(/#react/i)).toBeInTheDocument()
-    expect(screen.getByText(/5 claps/i)).toBeInTheDocument()
+    expect(screen.getByText(/❤️ 5/i)).toBeInTheDocument()
+    expect(screen.getByText(/💬 2/i)).toBeInTheDocument()
   })
 })
 

@@ -19,6 +19,14 @@ export function PostCard({ post, variant = 'default' }: PostCardProps) {
     setMounted(true)
   }, [])
 
+  const formatDate = (dateString: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateString), { addSuffix: true })
+    } catch {
+      return 'Recently'
+    }
+  }
+
   return (
     <article className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm hover:shadow-xl hover:border-green-200 transition-all duration-300 transform hover:-translate-y-1">
       <header className="flex items-center gap-3 mb-4">
@@ -31,7 +39,7 @@ export function PostCard({ post, variant = 'default' }: PostCardProps) {
           </Link>
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <time dateTime={post.publishedAt ?? post.createdAt}>
-              {mounted ? formatDistanceToNow(new Date(post.publishedAt ?? post.createdAt), { addSuffix: true }) : 'Loading...'}
+              {mounted ? formatDate(post.publishedAt ?? post.createdAt) : 'Loading...'}
             </time>
             <span>•</span>
             <span>{post.readTime} min read</span>
@@ -45,18 +53,20 @@ export function PostCard({ post, variant = 'default' }: PostCardProps) {
             <h3 className="text-xl lg:text-2xl font-bold tracking-tight text-gray-900 group-hover:text-green-600 transition-colors leading-tight line-clamp-2">
               {post.title}
             </h3>
-            <p className="text-gray-600 line-clamp-3 leading-relaxed">{post.excerpt}</p>
+            <p className="text-gray-600 line-clamp-3 leading-relaxed">
+              {post.excerpt?.replace(/<[^>]*>/g, '') || 'No excerpt available'}
+            </p>
           </Link>
 
-          {post.tags?.length > 0 && (
+          {post.tags && post.tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
               {post.tags.slice(0, 3).map((tag) => (
                 <Link
                   key={tag.id}
-                  href={`/tags/${tag.slug ?? tag.name}`}
+                  href={`/tags/${encodeURIComponent(tag.slug ?? tag.name)}`}
                   className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-green-100 hover:text-green-800 transition-colors"
                 >
-                  #{tag.name}
+                  #{tag.name.replace(/<[^>]*>/g, '')}
                 </Link>
               ))}
               {post.tags.length > 3 && (
