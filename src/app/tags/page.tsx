@@ -1,22 +1,24 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
+import { Prisma } from '@prisma/client'
 
-type TagWithCount = {
-  id: string
-  name: string
-  slug: string
-  _count: {
-    posts: number
+type TagWithCount = Prisma.TagGetPayload<{
+  include: {
+    _count: {
+      select: {
+        posts: true
+      }
+    }
   }
-}
+}>
 
 export default async function TagsPage() {
-  const tags: TagWithCount[] = await prisma.tag.findMany({
+  const tags = await prisma.tag.findMany({
     orderBy: { name: 'asc' },
     include: {
       _count: { select: { posts: true } },
     },
-  })
+  }) as TagWithCount[]
 
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
