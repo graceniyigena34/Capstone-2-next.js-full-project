@@ -1,8 +1,17 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/db'
 
+type TagWithCount = {
+  id: string
+  name: string
+  slug: string
+  _count: {
+    posts: number
+  }
+}
+
 export default async function TagsPage() {
-  const tags = await prisma.tag.findMany({
+  const tags: TagWithCount[] = await prisma.tag.findMany({
     orderBy: { name: 'asc' },
     include: {
       _count: { select: { posts: true } },
