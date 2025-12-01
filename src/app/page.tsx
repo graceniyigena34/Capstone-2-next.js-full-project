@@ -23,11 +23,7 @@ type PostWithRelations = {
     username: string
     image: string | null
   }
-  tags: {
-    id: string
-    name: string
-    slug: string
-  }[]
+
   _count: {
     likes: number
     comments: number
@@ -35,16 +31,16 @@ type PostWithRelations = {
 }
 
 type LatestPostsResult = PostWithRelations[]
-type TrendingTagsResult = Awaited<ReturnType<typeof prisma.tag.findMany>>
+
 
 export default async function Home() {
   let session: Awaited<ReturnType<typeof getCurrentSession>> = null;
   let latestPosts: LatestPostsResult = [];
-  let trendingTags: TrendingTagsResult = [];
+
   let featuredPost: PostWithRelations | null = null;
   
   try {
-    [session, latestPosts, trendingTags, featuredPost] = await Promise.all([
+    [session, latestPosts, featuredPost] = await Promise.all([
       getCurrentSession(),
       prisma.post.findMany({
         where: { published: true },
@@ -56,11 +52,7 @@ export default async function Home() {
           _count: { select: { likes: true, comments: true } },
         },
       }),
-      prisma.tag.findMany({
-        where: { posts: { some: { published: true } } },
-        take: 10,
-        orderBy: { name: 'asc' },
-      }),
+
       prisma.post.findFirst({
         where: { published: true },
         orderBy: { likes: { _count: 'desc' } },
@@ -76,7 +68,7 @@ export default async function Home() {
     // Fallback to empty data when database is unavailable
     session = null;
     latestPosts = [];
-    trendingTags = [];
+
     featuredPost = null;
   }
 
@@ -92,7 +84,7 @@ export default async function Home() {
       ...post.author,
       createdAt: new Date().toISOString()
     },
-    tags: post.tags || []
+
   }))
 
   const serializedFeatured: Post | null = featuredPost ? {
@@ -106,7 +98,7 @@ export default async function Home() {
       ...featuredPost.author,
       createdAt: new Date().toISOString()
     },
-    tags: featuredPost.tags || []
+
   } : null
 
   return (
@@ -206,22 +198,7 @@ export default async function Home() {
 
         {/* Sidebar */}
         <aside className="w-full xl:max-w-sm space-y-6 xl:sticky xl:top-24 xl:h-fit">
-          {/* Trending Topics */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6">
-            <h3 className="text-lg font-bold mb-4">Trending Topics</h3>
-            <div className="flex flex-wrap gap-2">
-              {trendingTags?.map((tag) => (
-                <Link
-                  key={tag.id}
-                  href={`/tags/${tag.slug ?? tag.name}`}
-                  className="px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-700 dark:to-green-800 text-green-800 dark:text-green-200 hover:from-green-200 dark:hover:from-green-500 hover:to-emerald-200 dark:hover:to-green-600 transition-all duration-200"
-                >
-                  #{tag.name}
-                </Link>
-              )) || []}
-              {(!trendingTags || trendingTags.length === 0) && <p className="text-gray-500 dark:text-gray-400 text-sm italic">Topics will appear as stories are published</p>}
-            </div>
-          </div>
+
 
           {/* Community CTA */}
           <div className="bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-pink-900 rounded-2xl shadow-lg border border-purple-100 dark:border-gray-700 p-6 text-center">
@@ -240,7 +217,7 @@ export default async function Home() {
             <h3 className="text-lg font-bold mb-4">Community Stats</h3>
             <div className="space-y-3 text-gray-600 dark:text-gray-300">
               <div className="flex justify-between"><span>Stories Published</span><span className="font-bold text-green-600">{latestPosts?.length || 0}+</span></div>
-              <div className="flex justify-between"><span>Active Topics</span><span className="font-bold text-purple-600">{trendingTags?.length || 0}+</span></div>
+
               <div className="flex justify-between"><span>Growing Daily</span><span className="font-bold text-blue-600">📈</span></div>
             </div>
           </div>

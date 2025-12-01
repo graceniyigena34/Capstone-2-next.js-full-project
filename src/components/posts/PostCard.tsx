@@ -58,24 +58,7 @@ export function PostCard({ post, variant = 'default' }: PostCardProps) {
             </p>
           </Link>
 
-          {post.tags && post.tags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {post.tags.slice(0, 3).map((tag) => (
-                <Link
-                  key={tag.id}
-                  href={`/tags/${encodeURIComponent(tag.slug ?? tag.name)}`}
-                  className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 hover:bg-green-100 hover:text-green-800 transition-colors"
-                >
-                  #{tag.name.replace(/<[^>]*>/g, '')}
-                </Link>
-              ))}
-              {post.tags.length > 3 && (
-                <span className="text-xs text-gray-500 px-2 py-1">
-                  +{post.tags.length - 3} more
-                </span>
-              )}
-            </div>
-          )}
+
         </div>
 
         {showCover && post.coverImage && (
