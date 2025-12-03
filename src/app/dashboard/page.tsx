@@ -1,3 +1,4 @@
+
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { redirect } from 'next/navigation'
@@ -26,7 +27,7 @@ export default async function DashboardPage() {
 
   const [publishedPosts, drafts, totalLikes] = (await Promise.all([
     prisma.post.findMany({
-      where: { authorId: session.user.id, published: true },
+      where: { authorId: session.user.id, published: true  },
       orderBy: { publishedAt: 'desc' },
       select: {
         id: true,
