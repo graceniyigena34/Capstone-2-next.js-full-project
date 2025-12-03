@@ -115,11 +115,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         </div>
         {serializedPosts.length === 0 && (
           <div className="rounded-xl sm:rounded-2xl border border-dashed border-gray-300 p-4 sm:p-6 text-sm sm:text-base text-gray-500 text-center">
-            No stories matched your search. Try another keyword or{' '}
-            <Link href="/tags" className="font-semibold text-green-600 hover:text-green-700">
-              browse tags
-            </Link>
-            .
+            No stories matched your search. Try another keyword.
           </div>
         )}
       </div>

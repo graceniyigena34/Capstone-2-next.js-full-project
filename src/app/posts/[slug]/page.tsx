@@ -157,22 +157,7 @@ export default async function PostPage({ params }: PostPageProps) {
           </div>
         </div>
 
-        {post.tags.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <Link
-                  key={tag.id}
-                  href={`/tags/${tag.slug ?? tag.name}`}
-                  className="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 hover:from-green-200 hover:to-emerald-200 transition-all duration-200"
-                >
-                  #{tag.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
+
       </article>
 
       <section id="comments" className="mt-8 sm:mt-12 bg-white rounded-2xl p-6 border border-gray-200">

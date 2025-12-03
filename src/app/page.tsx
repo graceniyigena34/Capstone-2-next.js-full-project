@@ -4,6 +4,8 @@ import { getCurrentSession } from '@/lib/auth'
 import type { Post } from '@/types'
 import { PostCard } from '@/components/posts/PostCard'
 
+export const dynamic = 'force-dynamic'
+
 type PostWithRelations = {
   id: string
   title: string
