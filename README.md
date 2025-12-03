@@ -5,15 +5,19 @@ A rich publishing platform built with **Next.js App Router**, **NextAuth**, **Pr
 
 ## Features
 
-User Authentication: Sign up, log in, and log out using Supabase authentication.
+User Authentication: Sign up, log in, and log out using NextAuth authentication.
 
 Write Stories: Only registered users can submit stories.
 
 Read Stories: Everyone can browse and read motivational stories.
 
+Like Stories: Anyone can like stories without an account (anonymous likes supported).
+
+Comment on Stories: Only registered users can post comments and replies.
+
 Responsive UI: Supports light and dark modes.
 
-Secure Database: Stores users and stories securely in Supabase PostgreSQL database.
+Secure Database: Stores users and stories securely in PostgreSQL database.
 
 ## Tech Stack
 
