@@ -48,7 +48,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async redirect({ url, baseUrl }) {
+    async redirect({baseUrl }) {
       return `${baseUrl}/editor`
     },
     async jwt({ token, user }) {
