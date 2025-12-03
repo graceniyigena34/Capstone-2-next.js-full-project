@@ -1,6 +1,30 @@
 ## Storypress
+This project StoryPress is a motivational story-sharing platform where users can write, read, and share stories. Users must have an account to write stories, ensuring a secure and personalized experience. 
 
-A rich publishing platform built with **Next.js App Router**, **NextAuth**, **Prisma**, and **React Query**. Storypress covers the full Phase 2 readiness brief: authentication, rich text editing, post lifecycle, social interactions, SEO-friendly routing, and deploy-ready quality gates.
+A rich publishing platform built with **Next.js App Router**, **NextAuth**, **Prisma**, and **React Query**.
+
+## Features
+
+User Authentication: Sign up, log in, and log out using Supabase authentication.
+
+Write Stories: Only registered users can submit stories.
+
+Read Stories: Everyone can browse and read motivational stories.
+
+Responsive UI: Supports light and dark modes.
+
+Secure Database: Stores users and stories securely in Supabase PostgreSQL database.
+
+## Tech Stack
+
+Frontend: Next.js, React
+
+Backend / Database: Supabase (PostgreSQL)
+
+Styling: Tailwind CSS
+
+Authentication: Supabase Auth
+
 
 ### Highlights
 

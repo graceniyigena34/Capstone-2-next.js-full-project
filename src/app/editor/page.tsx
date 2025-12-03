@@ -1,9 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
@@ -42,6 +43,7 @@ async function uploadCover(file: File) {
 }
 
 export default function EditorPage() {
+  const { data: session, status } = useSession()
   const [content, setContent] = useState("");
   const [title, setTitle] = useState("");
   const [tagInput, setTagInput] = useState("");
@@ -50,6 +52,27 @@ export default function EditorPage() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [coverImage, setCoverImage] = useState<string>();
   const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router]);
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return null
+  }
 
   const editorConfig = useMemo(
     () => ({
