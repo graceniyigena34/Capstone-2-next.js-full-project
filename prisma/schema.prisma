@@ -1,10 +1,10 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-}
-
-generator client {
-  provider = "prisma-client-js"
 }
 
 model User {
@@ -17,14 +17,11 @@ model User {
   password  String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-
-  posts     Post[]    @relation("UserPosts")
   comments  Comment[] @relation("UserComments")
-  likes     Like[]    @relation("UserLikes")
-  
-  // Follow relationships
-  followers Follow[]  @relation("UserFollowers")
   following Follow[]  @relation("UserFollowing")
+  followers Follow[]  @relation("UserFollowers")
+  likes     Like[]    @relation("UserLikes")
+  posts     Post[]    @relation("UserPosts")
 }
 
 model Post {
@@ -39,12 +36,10 @@ model Post {
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
-  author      User      @relation("UserPosts", fields: [authorId], references: [id])
   authorId    String
-
   comments    Comment[] @relation("PostComments")
   likes       Like[]    @relation("PostLikes")
+  author      User      @relation("UserPosts", fields: [authorId], references: [id])
   tags        Tag[]     @relation("PostTags")
 }
 
@@ -53,28 +48,22 @@ model Comment {
   content   String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-
-  post      Post      @relation("PostComments", fields: [postId], references: [id], onDelete: Cascade)
   postId    String
-
-  author    User      @relation("UserComments", fields: [authorId], references: [id], onDelete: Cascade)
   authorId  String
-
-  // Self-referencing for replies
-  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   parentId  String?
+  author    User      @relation("UserComments", fields: [authorId], references: [id], onDelete: Cascade)
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   Comment[] @relation("CommentReplies")
+  post      Post      @relation("PostComments", fields: [postId], references: [id], onDelete: Cascade)
 }
 
 model Like {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-
-  post      Post     @relation("PostLikes", fields: [postId], references: [id], onDelete: Cascade)
   postId    String
-
-  user      User     @relation("UserLikes", fields: [userId], references: [id], onDelete: Cascade)
   userId    String
+  post      Post     @relation("PostLikes", fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation("UserLikes", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, postId])
 }
@@ -85,19 +74,16 @@ model Tag {
   slug      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   posts     Post[]   @relation("PostTags")
 }
 
 model Follow {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
-
-  follower    User     @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
   followerId  String
-
-  following   User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
   followingId String
+  follower    User     @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
 }
