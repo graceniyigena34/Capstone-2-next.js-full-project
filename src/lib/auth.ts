@@ -48,6 +48,9 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    // async redirect({baseUrl }) {
+    //   return `${baseUrl}/editor`
+    // },
     // async redirect({ url, baseUrl }) {
     //   return `${baseUrl}`
     // },
